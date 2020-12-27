@@ -1,24 +1,29 @@
-require "youtube_to_rss/version"
+require 'youtube_to_rss/version'
 
 module YoutubeToRss
   class Error < StandardError; end
   class << self
     def convert(url)
       url = remove_query_strings(url)
+      base_url = 'https://www.youtube.com/feeds/videos.xml?'
 
       if url.include?('/channel/')
-        channel_id = url.split('/channel/').last
-        'https://www.youtube.com/feeds/videos.xml?channel_id=' + channel_id
+        "#{base_url}channel_id=#{extract_param(url, '/channel/')}"
       elsif url.include?('/user/')
-        user = url.split('/user/').last
-        'https://www.youtube.com/feeds/videos.xml?user=' + user
+        "#{base_url}user=#{extract_param(url, '/user/')}"
+      else
+        raise 'URL should have channel or user param.'
       end
     end
 
     private
 
+    def extract_param(url, param)
+      url.split(param).last
+    end
+
     def remove_query_strings(url)
-      url.chomp("?").chomp("&")
+      url.split('?').first.split('&').first
     end
   end
 end
