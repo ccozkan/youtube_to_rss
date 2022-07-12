@@ -14,20 +14,22 @@ RSpec.describe YoutubeToRss do
       end
     end
 
+    context 'when c param is present' do
+      let!(:url) { 'https://www.youtube.com/c/abc123xyz321' }
+
+      it { expect(rss_link).to eq 'https://www.youtube.com/feeds/videos.xml?channel_id=abc123xyz321' }
+    end
+
     context 'when user param is present' do
       let!(:url) { 'https://www.youtube.com/user/foo' }
 
-      it do
-        expect(rss_link).to eq 'https://www.youtube.com/feeds/videos.xml?user=foo'
-      end
+      it { expect(rss_link).to eq 'https://www.youtube.com/feeds/videos.xml?user=foo' }
     end
 
     context 'when user or channel params are not present' do
       let!(:url) { 'https://www.youtube.com/hahaha/rofl' }
 
-      it do
-        expect{ rss_link }.to raise_error(StandardError, 'URL should have channel or user param.')
-      end
+      it { expect{ rss_link }.to raise_error(StandardError, 'URL should have channel or user param.') }
     end
   end
 
