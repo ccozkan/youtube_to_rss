@@ -1,32 +1,19 @@
 require 'youtube_to_rss/version'
+require 'rest-client'
+require 'nokogiri'
 
 module YoutubeToRss
   class Error < StandardError; end
 
   class << self
     def convert(url)
-      url = remove_query_strings(url)
+      html = RestClient.get url
+      doc = Nokogiri::HTML(html).text
+      channel_id = doc.split('channel_id=').last.split('",').first
+      # channel_id = doc.split('"rssUrl":"https://www.youtube.com/feeds/videos.xml?channel_id=').last.split('",').first
       base_url = 'https://www.youtube.com/feeds/videos.xml?'
 
-      if url.include?('/channel/')
-        "#{base_url}channel_id=#{extract_param(url, '/channel/')}"
-      elsif url.include?('/c/')
-          "#{base_url}channel_id=#{extract_param(url, '/c/')}"
-      elsif url.include?('/user/')
-        "#{base_url}user=#{extract_param(url, '/user/')}"
-      else
-        raise 'URL should have "channel" or "c" or "user" param.'
-      end
-    end
-
-    private
-
-    def extract_param(url, param)
-      url.split(param).last
-    end
-
-    def remove_query_strings(url)
-      url.split('?').first.split('&').first
+      "#{base_url}channel_id=#{channel_id}"
     end
   end
 end
